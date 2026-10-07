@@ -1,0 +1,27 @@
+[package]
+name = "kakuro"
+version = "0.1.0"
+description = "Generate and play Kakuro puzzles"
+edition.workspace = true
+publish = false
+default-run = "kakuro"
+
+[lib]
+name = "kakuro_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { workspace = true, features = [] }
+
+[dependencies]
+kakuro-core = { workspace = true }
+rand = { workspace = true }
+tauri = { workspace = true, features = [] }
+tauri-specta = { workspace = true }
+specta = { workspace = true }
+specta-typescript = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

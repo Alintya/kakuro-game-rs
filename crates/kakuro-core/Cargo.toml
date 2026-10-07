@@ -1,0 +1,18 @@
+[package]
+name = "kakuro-core"
+version = "0.1.0"
+description = "Kakuro puzzle model, generator, solver and game state"
+edition.workspace = true
+publish = false
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+specta = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

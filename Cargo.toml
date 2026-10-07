@@ -1,0 +1,49 @@
+[workspace]
+members = ["crates/kakuro-core", "src-tauri"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+
+[workspace.dependencies]
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+thiserror = "2"
+
+# Randomness
+rand = "0.10"
+rand_chacha = "0.10"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Type export (IPC bindings)
+specta = { version = "=2.0.0-rc.25", features = ["derive"] }
+specta-typescript = "0.0.12"
+tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
+
+# Tauri
+tauri = { version = "2", features = ["specta"] }
+tauri-build = "2"
+
+# Testing
+tempfile = "3"
+
+# Internal crates
+kakuro-core = { path = "crates/kakuro-core" }
+
+[profile.dev]
+# The generator is hot; opt-level 0 makes Expert generation sluggish in `tauri dev`.
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.release]
+lto = "thin"
+strip = "symbols"
+codegen-units = 1
