@@ -1,5 +1,7 @@
 <script lang="ts">
 import { onMount } from 'svelte';
+// Detailed app icon; readable at welcome-card size. `no-inline`: the CSP has no `data:` source.
+import appIcon from '#icons/app-icon.svg?no-inline';
 import Grid from '#lib/components/Grid.svelte';
 import Header from '#lib/components/Header.svelte';
 import Icon from '#lib/components/Icon.svelte';
@@ -118,7 +120,7 @@ function onkeydown(e: KeyboardEvent) {
         <SolvedOverlay snapshot={game.snapshot} onnewgame={openNewGame} />
       {:else if game.generating === null}
         <div class="card welcome">
-          <span class="logo" aria-hidden="true"></span>
+          <img class="logo" src={appIcon} alt="" width="64" height="64" />
           <h1>Welcome to Kakuro</h1>
           <p>
             Fill every white cell with 1–9 so each run adds up to its clue, without repeating a digit
@@ -237,16 +239,6 @@ function onkeydown(e: KeyboardEvent) {
 
   .welcome .logo {
     display: block;
-    width: 36px;
-    height: 36px;
-    border-radius: 9px;
-    box-shadow: inset 0 0 0 1px var(--border);
-    background: linear-gradient(
-      to bottom left,
-      var(--block) 47%,
-      var(--accent) 47% 53%,
-      var(--block) 53%
-    );
   }
 
   .welcome h1 {

@@ -39,4 +39,5 @@ cargo test --workspace   # core tests
 bun run check && bun run lint
 cargo run -p kakuro -- --export-bindings                   # regenerate IPC bindings only
 cargo run -p kakuro-core --example print -- expert [seed]  # print a generated puzzle + solution
+bun run icons           # regenerate src-tauri/icons from app-icon.svg / app-icon-small.svg
 ```

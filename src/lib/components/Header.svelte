@@ -1,5 +1,7 @@
 <script lang="ts">
 import { onMount } from 'svelte';
+// Same artwork as the taskbar icon; `no-inline` because the CSP has no `data:` image source.
+import appIcon from '#icons/app-icon-small.svg?no-inline';
 import Icon from '#lib/components/Icon.svelte';
 import Timer from '#lib/components/Timer.svelte';
 import WindowControls from '#lib/components/WindowControls.svelte';
@@ -46,7 +48,7 @@ function onmousedown(e: MouseEvent) {
   {onmousedown}
 >
   <div class="brand">
-    <span class="logo" aria-hidden="true"></span>
+    <img class="logo" src={appIcon} alt="" width="24" height="24" draggable="false" />
     <span class="title">Kakuro</span>
   </div>
 
@@ -127,16 +129,7 @@ function onmousedown(e: MouseEvent) {
   }
 
   .logo {
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-    box-shadow: inset 0 0 0 1px var(--border);
-    background: linear-gradient(
-      to bottom left,
-      var(--block) 47%,
-      var(--accent) 47% 53%,
-      var(--block) 53%
-    );
+    display: block;
   }
 
   .title {

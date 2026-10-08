@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    16–32 px variant of app-icon.svg: no digits (they blur at that size), bolder diagonals.
+    Regenerate the bundled icons with `bun run icons`, not `tauri icon` directly.
+  -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4d78ff" />
+      <stop offset="1" stop-color="#2443c4" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)" />
+  <rect x="136" y="136" width="752" height="752" rx="72" fill="#15171b" />
+
+  <g fill="#2c2f35">
+    <rect x="162" y="162" width="220" height="220" rx="36" />
+    <rect x="402" y="162" width="220" height="220" rx="36" />
+    <rect x="642" y="162" width="220" height="220" rx="36" />
+    <rect x="162" y="402" width="220" height="220" rx="36" />
+    <rect x="162" y="642" width="220" height="220" rx="36" />
+  </g>
+  <g stroke="#8fb0ff" stroke-width="28" stroke-linecap="round">
+    <path d="M426 186 598 358" />
+    <path d="M666 186 838 358" />
+    <path d="M186 426 358 598" />
+    <path d="M186 666 358 838" />
+  </g>
+
+  <g fill="#f5f4f0">
+    <rect x="402" y="402" width="220" height="220" rx="36" />
+    <rect x="642" y="402" width="220" height="220" rx="36" />
+    <rect x="402" y="642" width="220" height="220" rx="36" />
+  </g>
+  <rect x="649" y="649" width="206" height="206" rx="30" fill="#dfe7fe" stroke="#3a66f0" stroke-width="14" />
+</svg>

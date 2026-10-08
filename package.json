@@ -11,7 +11,8 @@
     "check": "bun -e \"require('fs').rmSync('.svelte-kit/.svelte-check', { recursive: true, force: true })\" && bun --bun svelte-kit sync && bun --bun svelte-check --tsgo --tsconfig ./tsconfig.json",
     "lint": "biome ci .",
     "format": "biome format --write .",
-    "tauri": "bun --bun node_modules/@tauri-apps/cli/tauri.js"
+    "tauri": "bun --bun node_modules/@tauri-apps/cli/tauri.js",
+    "icons": "bun scripts/icons.ts"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.0"
@@ -30,6 +31,7 @@
     "vite": "^8.0.12"
   },
   "imports": {
-    "#lib/*": "./src/lib/*"
+    "#lib/*": "./src/lib/*",
+    "#icons/*": "./src-tauri/icons/*"
   }
 }
