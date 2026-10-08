@@ -5,19 +5,38 @@ import type { GameSnapshot } from '#lib/ipc/index.js';
 
 let { snapshot, onnewgame }: { snapshot: GameSnapshot; onnewgame: () => void } = $props();
 
-/** Seed of the puzzle whose card was dismissed with "View grid". */
-let dismissedSeed = $state<number | null>(null);
+/** "View grid" hides the card until the puzzle is unsolved (e.g. undo) and solved again. */
+let dismissed = $state(false);
+let newGameButton = $state<HTMLButtonElement>();
+
+$effect.pre(() => {
+  if (!snapshot.solved) dismissed = false;
+});
+
+// Move focus into the card so Enter starts a new game and screen readers land on it.
+$effect(() => {
+  newGameButton?.focus();
+});
 </script>
 
-{#if snapshot.solved && dismissedSeed !== snapshot.seed}
-  <div class="overlay" role="status">
+{#if snapshot.solved && !dismissed}
+  <div class="overlay">
     <div class="card solved-card">
       <span class="badge"><Icon name="check" size={24} /></span>
-      <h2>Puzzle solved!</h2>
-      <p>{specLabel(snapshot.spec)} in {formatTime(snapshot.elapsed_ms)}</p>
+      <div role="status">
+        <h2>Puzzle solved!</h2>
+        <p>{specLabel(snapshot.spec)} in {formatTime(snapshot.elapsed_ms)}</p>
+      </div>
       <div class="actions">
-        <button type="button" class="btn btn-primary" onclick={onnewgame}>New game</button>
-        <button type="button" class="btn btn-ghost" onclick={() => (dismissedSeed = snapshot.seed)}>
+        <button
+          bind:this={newGameButton}
+          type="button"
+          class="btn btn-primary"
+          onclick={onnewgame}
+        >
+          New game
+        </button>
+        <button type="button" class="btn btn-ghost" onclick={() => (dismissed = true)}>
           View grid
         </button>
       </div>

@@ -21,7 +21,7 @@ const done = $derived.by(() => {
 <div
   class="grid"
   class:solved={snapshot.solved}
-  role="grid"
+  role="group"
   aria-label="Kakuro grid"
   style:--rows={snapshot.rows}
   style:--cols={snapshot.cols}

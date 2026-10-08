@@ -22,8 +22,12 @@ onMount(() => {
   const win = getCurrentWindow();
   // Minimizing may not surface as `visibilitychange` in every webview, so also ask the window
   // whenever it resizes or gains/loses focus (minimize and restore do both).
+  // Each answer is async; a slower, older one must not overwrite a newer one.
+  let latest = 0;
   const update = async () => {
-    game.windowHidden = document.visibilityState === 'hidden' || (await win.isMinimized());
+    const call = ++latest;
+    const hidden = document.visibilityState === 'hidden' || (await win.isMinimized());
+    if (call === latest) game.windowHidden = hidden;
   };
   document.addEventListener('visibilitychange', update);
   const unlisten = [win.onResized(update), win.onFocusChanged(update)];
@@ -53,9 +57,11 @@ function onkeydown(e: KeyboardEvent) {
   if (document.querySelector('dialog[open]')) return;
   if (e.ctrlKey || e.metaKey) {
     if (e.altKey) return;
-    if (e.code === 'KeyZ') (e.shiftKey ? game.redo : game.undo)();
-    else if (e.code === 'KeyY') game.redo();
-    else if (e.code === 'KeyN') openNewGame();
+    // `key`, not `code`: letters move between layouts (QWERTZ swaps Z/Y, AZERTY moves Z).
+    const key = e.key.toLowerCase();
+    if (key === 'z') (e.shiftKey ? game.redo : game.undo)();
+    else if (key === 'y') game.redo();
+    else if (key === 'n') openNewGame();
     else return;
     e.preventDefault();
     return;
@@ -166,14 +172,16 @@ function onkeydown(e: KeyboardEvent) {
     }
   }
 
-  /* Size container for the grid's cq units. */
+  /* Size container for the grid's cq units. Very small windows scroll instead of letting the
+     grid spill over the panel; `safe` keeps the overflowing edge reachable. */
   .board {
     container-type: size;
     position: relative;
     min-height: 0;
+    overflow: auto;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: safe center;
+    justify-content: safe center;
   }
 
   .grid-wrap {
