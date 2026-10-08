@@ -25,6 +25,8 @@ The side panel holds the pen/pencil switch, a digit pad and undo/redo/clear. Sol
 
 Undo history and play time are saved with the game. The clock stops when the puzzle is solved and, unless **Pause when minimized** is turned off in Settings, while the window is minimized or hidden; an unfocused but visible window keeps it running.
 
+On Windows the app draws its own title bar (`src-tauri/tauri.windows.conf.json` turns off native decorations): drag the header to move the window, double-click it to maximize, and use the minimize/maximize/close buttons at its right edge. Other platforms keep the native title bar.
+
 ## Development
 
 The JS tooling (Vite, SvelteKit, svelte-check, Tauri CLI) runs on the Bun runtime via `bun --bun` in the `package.json` scripts, so Node.js is not required; use the scripts rather than invoking the tools directly. `bun run check` type-checks with TypeScript 7 (`svelte-check --tsgo`); TypeScript 6 stays installed because svelte-check and SvelteKit still load it.

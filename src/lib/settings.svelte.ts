@@ -1,4 +1,4 @@
-import { getCurrentWindow } from '@tauri-apps/api/window';
+import { appWindow, windowCommand } from '#lib/window.js';
 
 export type ThemePref = 'system' | 'light' | 'dark';
 
@@ -32,10 +32,8 @@ function readTheme(): ThemePref {
 function applyTheme(pref: ThemePref) {
   if (pref === 'system') delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = pref;
-  // Native title bar; cosmetic, so a failure only warns.
-  getCurrentWindow()
-    .setTheme(pref === 'system' ? null : pref)
-    .catch((e) => console.warn('setTheme failed', e));
+  // Native title bar (where there is one); cosmetic, so a failure only warns.
+  windowCommand('setTheme', () => appWindow.setTheme(pref === 'system' ? null : pref));
 }
 
 /** UI preferences kept in localStorage (game progress lives in Rust). */

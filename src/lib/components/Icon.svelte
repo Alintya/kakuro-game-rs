@@ -31,13 +31,20 @@ const PATHS = {
   ],
   'arrow-right': ['M5 12h14M12 5l7 7-7 7'],
   'arrow-down': ['M12 5v14M19 12l-7 7-7-7'],
+  'window-minimize': ['M5 12h14'],
+  'window-maximize': ['M6 6h12v12H6z'],
+  'window-restore': ['M5 9h10v10H5z', 'M9 9V5h10v10h-4'],
 } satisfies Record<string, string[]>;
 
 export type IconName = keyof typeof PATHS;
 </script>
 
 <script lang="ts">
-let { name, size = 18 }: { name: IconName; size?: number } = $props();
+let {
+  name,
+  size = 18,
+  stroke = 2,
+}: { name: IconName; size?: number; stroke?: number } = $props();
 </script>
 
 <svg
@@ -46,7 +53,7 @@ let { name, size = 18 }: { name: IconName; size?: number } = $props();
   viewBox="0 0 24 24"
   fill="none"
   stroke="currentColor"
-  stroke-width="2"
+  stroke-width={stroke}
   stroke-linecap="round"
   stroke-linejoin="round"
   aria-hidden="true"

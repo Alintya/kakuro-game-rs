@@ -1,0 +1,16 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "app": {
+    "windows": [
+      {
+        "title": "Kakuro",
+        "width": 960,
+        "height": 800,
+        "minWidth": 640,
+        "minHeight": 560,
+        "resizable": true,
+        "decorations": false
+      }
+    ]
+  }
+}

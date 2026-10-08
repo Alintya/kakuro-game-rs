@@ -1713,6 +1713,7 @@ version = "0.1.0"
 dependencies = [
  "kakuro-core",
  "rand",
+ "serde_json",
  "specta",
  "specta-typescript",
  "tauri",

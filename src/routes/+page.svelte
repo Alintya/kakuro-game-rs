@@ -1,5 +1,4 @@
 <script lang="ts">
-import { getCurrentWindow } from '@tauri-apps/api/window';
 import { onMount } from 'svelte';
 import Grid from '#lib/components/Grid.svelte';
 import Header from '#lib/components/Header.svelte';
@@ -10,6 +9,7 @@ import SidePanel from '#lib/components/SidePanel.svelte';
 import SizePicker from '#lib/components/SizePicker.svelte';
 import SolvedOverlay from '#lib/components/SolvedOverlay.svelte';
 import { game, specLabel } from '#lib/game.svelte.js';
+import { appWindow } from '#lib/window.js';
 
 let newGameDialog: NewGameDialog;
 let settingsDialog: SettingsDialog;
@@ -19,18 +19,17 @@ function openNewGame() {
 }
 
 onMount(() => {
-  const win = getCurrentWindow();
   // Minimizing may not surface as `visibilitychange` in every webview, so also ask the window
   // whenever it resizes or gains/loses focus (minimize and restore do both).
   // Each answer is async; a slower, older one must not overwrite a newer one.
   let latest = 0;
   const update = async () => {
     const call = ++latest;
-    const hidden = document.visibilityState === 'hidden' || (await win.isMinimized());
+    const hidden = document.visibilityState === 'hidden' || (await appWindow.isMinimized());
     if (call === latest) game.windowHidden = hidden;
   };
   document.addEventListener('visibilitychange', update);
-  const unlisten = [win.onResized(update), win.onFocusChanged(update)];
+  const unlisten = [appWindow.onResized(update), appWindow.onFocusChanged(update)];
   game.init();
   update();
   return () => {
