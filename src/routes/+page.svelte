@@ -4,12 +4,14 @@ import Grid from '#lib/components/Grid.svelte';
 import Header from '#lib/components/Header.svelte';
 import Icon from '#lib/components/Icon.svelte';
 import NewGameDialog from '#lib/components/NewGameDialog.svelte';
+import SettingsDialog from '#lib/components/SettingsDialog.svelte';
 import SidePanel from '#lib/components/SidePanel.svelte';
 import SizePicker from '#lib/components/SizePicker.svelte';
 import SolvedOverlay from '#lib/components/SolvedOverlay.svelte';
 import { game, specLabel, windowActive } from '#lib/game.svelte.js';
 
 let newGameDialog: NewGameDialog;
+let settingsDialog: SettingsDialog;
 
 function openNewGame() {
   if (game.generating === null) newGameDialog.open();
@@ -76,7 +78,7 @@ function onkeydown(e: KeyboardEvent) {
 <svelte:window {onkeydown} />
 
 <div class="app">
-  <Header onnewgame={openNewGame} />
+  <Header onnewgame={openNewGame} onsettings={() => settingsDialog.open()} />
 
   <main class="layout" class:has-panel={game.snapshot !== null}>
     <section class="board">
@@ -126,6 +128,7 @@ function onkeydown(e: KeyboardEvent) {
 </div>
 
 <NewGameDialog bind:this={newGameDialog} />
+<SettingsDialog bind:this={settingsDialog} />
 
 <style>
   .app {

@@ -20,8 +20,8 @@ function start(spec: PuzzleSpec) {
 }
 </script>
 
-<dialog bind:this={dialog} closedby="any" aria-labelledby="new-game-title">
-  <header>
+<dialog bind:this={dialog} class="modal" closedby="any" aria-labelledby="new-game-title">
+  <header class="modal-header">
     <h2 id="new-game-title">New game</h2>
     <button type="button" class="icon-btn" aria-label="Close" onclick={() => dialog.close()}>
       <Icon name="x" />
@@ -36,46 +36,6 @@ function start(spec: PuzzleSpec) {
 </dialog>
 
 <style>
-  dialog {
-    width: min(460px, 92vw);
-    box-sizing: border-box;
-    padding: 20px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    color: var(--fg);
-    box-shadow: var(--shadow-lg);
-  }
-
-  dialog[open] {
-    animation: dialog-in 160ms ease-out;
-  }
-
-  dialog::backdrop {
-    background: rgb(0 0 0 / 0.35);
-    backdrop-filter: blur(2px);
-  }
-
-  @keyframes dialog-in {
-    from {
-      opacity: 0;
-      transform: translateY(8px) scale(0.98);
-    }
-  }
-
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-
-  h2 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: 1.25rem;
-  }
-
   .warn {
     margin: -6px 0 14px;
     color: var(--muted);

@@ -3,7 +3,12 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 export type ThemePref = 'system' | 'light' | 'dark';
 
 const THEME_KEY = 'kakuro.theme';
-const HELPER_KEY = 'kakuro.showHelper';
+/** Solving aids are opt-in; stored as 'true' once enabled in Settings. */
+const AID_KEYS = {
+  showCombinations: 'kakuro.aid.combinations',
+  dimDigits: 'kakuro.aid.dimDigits',
+} as const;
+export type Aid = keyof typeof AID_KEYS;
 const NEXT: Record<ThemePref, ThemePref> = { system: 'light', light: 'dark', dark: 'system' };
 
 export const THEME_LABEL: Record<ThemePref, string> = {
@@ -29,7 +34,10 @@ function applyTheme(pref: ThemePref) {
 /** UI preferences kept in localStorage (game progress lives in Rust). */
 class Settings {
   theme = $state<ThemePref>(readTheme());
-  showHelper = $state(localStorage.getItem(HELPER_KEY) !== 'false');
+  /** Combinations panel for the selected cell's runs. */
+  showCombinations = $state(localStorage.getItem(AID_KEYS.showCombinations) === 'true');
+  /** Fade pad digits that cannot go in the selected cell. */
+  dimDigits = $state(localStorage.getItem(AID_KEYS.dimDigits) === 'true');
 
   cycleTheme = () => {
     this.theme = NEXT[this.theme];
@@ -37,9 +45,9 @@ class Settings {
     applyTheme(this.theme);
   };
 
-  setShowHelper = (on: boolean) => {
-    this.showHelper = on;
-    localStorage.setItem(HELPER_KEY, String(on));
+  setAid = (aid: Aid, on: boolean) => {
+    this[aid] = on;
+    localStorage.setItem(AID_KEYS[aid], String(on));
   };
 }
 

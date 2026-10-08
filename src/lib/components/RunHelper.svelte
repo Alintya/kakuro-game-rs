@@ -2,7 +2,6 @@
 import Icon from '#lib/components/Icon.svelte';
 import { game } from '#lib/game.svelte.js';
 import { combinations, runDigits, viable } from '#lib/runs.js';
-import { settings } from '#lib/settings.svelte.js';
 
 const runs = $derived.by(() => {
   if (game.selected === null) return [];
@@ -12,20 +11,9 @@ const runs = $derived.by(() => {
 </script>
 
 <section class="card helper" aria-labelledby="helper-title">
-  <header>
-    <h2 id="helper-title">Combinations</h2>
-    <label class="switch">
-      <input
-        type="checkbox"
-        role="switch"
-        checked={settings.showHelper}
-        onchange={(e) => settings.setShowHelper(e.currentTarget.checked)}
-      />
-      <span>Show</span>
-    </label>
-  </header>
+  <h2 id="helper-title">Combinations</h2>
 
-  {#if settings.showHelper && game.snapshot}
+  {#if game.snapshot}
     {#if game.selected === null}
       <p class="hint">Select a cell to see the digit sets that fit its runs.</p>
     {:else}
@@ -51,12 +39,6 @@ const runs = $derived.by(() => {
 </section>
 
 <style>
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
   h2 {
     margin: 0;
     color: var(--muted);
@@ -64,48 +46,6 @@ const runs = $derived.by(() => {
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-  }
-
-  .switch {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--muted);
-    font-size: 0.85rem;
-    cursor: pointer;
-  }
-
-  .switch input {
-    appearance: none;
-    position: relative;
-    width: 30px;
-    height: 18px;
-    margin: 0;
-    border-radius: 999px;
-    background: var(--border);
-    cursor: pointer;
-    transition: background-color 150ms;
-  }
-
-  .switch input::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--surface);
-    box-shadow: var(--shadow-sm);
-    transition: transform 150ms;
-  }
-
-  .switch input:checked {
-    background: var(--accent);
-  }
-
-  .switch input:checked::after {
-    transform: translateX(12px);
   }
 
   .hint {

@@ -21,7 +21,7 @@ Sizes (chosen from the **New game** dialog): Beginner 6×6, Intermediate 9×9, E
 
 Conflicting cells (repeated digit in a run, partial sum over the clue, complete run with the wrong sum) are highlighted live; the puzzle is marked solved once every cell is filled without conflicts. Selecting a cell highlights its runs and their clues; clues of correctly completed runs fade out.
 
-The side panel holds the pen/pencil switch, a digit pad, undo/redo/clear and a **Combinations** helper listing the digit sets that fit the selected cell's runs (sets ruled out by entered digits are struck through; digits that cannot go in the cell are dimmed on the pad). The helper and the theme (System/Light/Dark, header button) are remembered in the webview's `localStorage`.
+The side panel holds the pen/pencil switch, a digit pad and undo/redo/clear. Solving aids are off by default and can be turned on individually in **Settings** (header gear button): a **Combinations** panel listing the digit sets that fit the selected cell's runs (sets ruled out by entered digits are struck through), and dimming of digit pad keys that cannot go in the selected cell. These choices and the theme (System/Light/Dark, header button) are remembered in the webview's `localStorage`.
 
 Undo history and play time are saved with the game. The clock runs only while the window is focused and visible, and stops when the puzzle is solved.
 

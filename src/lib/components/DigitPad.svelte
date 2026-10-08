@@ -7,7 +7,7 @@ const DIGITS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const disabled = $derived(game.selected === null || game.generating !== null);
 const cands = $derived(
-  settings.showHelper && game.selected !== null && game.snapshot
+  settings.dimDigits && game.selected !== null && game.snapshot
     ? candidateDigits(game.selected, game.runsAt[game.selected], game.snapshot)
     : null,
 );

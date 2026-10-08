@@ -102,6 +102,82 @@ input {
   box-shadow: var(--shadow-sm);
 }
 
+/* <dialog class="modal"> with a <header class="modal-header"> (title + close button). */
+.modal {
+  width: min(460px, 92vw);
+  box-sizing: border-box;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: var(--shadow-lg);
+}
+
+.modal[open] {
+  animation: dialog-in 160ms ease-out;
+}
+
+.modal::backdrop {
+  background: rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(2px);
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+/* <input type="checkbox" role="switch" class="switch"> */
+.switch {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 20px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--border);
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform 150ms;
+}
+
+.switch:checked {
+  background: var(--accent);
+}
+
+.switch:checked::after {
+  transform: translateX(14px);
+}
+
 .spinner {
   width: 18px;
   height: 18px;

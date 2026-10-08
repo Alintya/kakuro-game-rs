@@ -3,6 +3,7 @@ import DigitPad from '#lib/components/DigitPad.svelte';
 import Icon from '#lib/components/Icon.svelte';
 import RunHelper from '#lib/components/RunHelper.svelte';
 import { game } from '#lib/game.svelte.js';
+import { settings } from '#lib/settings.svelte.js';
 
 const SHORTCUTS: [string[], string][] = [
   [['←', '↑', '→', '↓'], 'Move'],
@@ -74,7 +75,9 @@ const SHORTCUTS: [string[], string][] = [
     </div>
   </section>
 
-  <RunHelper />
+  {#if settings.showCombinations}
+    <RunHelper />
+  {/if}
 
   <details class="card shortcuts">
     <summary>Keyboard shortcuts</summary>

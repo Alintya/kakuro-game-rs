@@ -23,6 +23,12 @@ const PATHS = {
   pause: ['M10 4H6v16h4zM18 4h-4v16h4z'],
   check: ['M20 6 9 17l-5-5'],
   x: ['M18 6 6 18M6 6l12 12'],
+  settings: [
+    'M20 7h-9',
+    'M14 17H5',
+    'M20 17a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+    'M10 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0',
+  ],
   'arrow-right': ['M5 12h14M12 5l7 7-7 7'],
   'arrow-down': ['M12 5v14M19 12l-7 7-7-7'],
 } satisfies Record<string, string[]>;

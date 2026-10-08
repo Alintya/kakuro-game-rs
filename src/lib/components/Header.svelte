@@ -4,7 +4,7 @@ import Timer from '#lib/components/Timer.svelte';
 import { game, specLabel } from '#lib/game.svelte.js';
 import { settings, THEME_LABEL } from '#lib/settings.svelte.js';
 
-let { onnewgame }: { onnewgame: () => void } = $props();
+let { onnewgame, onsettings }: { onnewgame: () => void; onsettings: () => void } = $props();
 
 const THEME_ICON = { system: 'monitor', light: 'sun', dark: 'moon' } as const;
 </script>
@@ -35,6 +35,15 @@ const THEME_ICON = { system: 'monitor', light: 'sun', dark: 'moon' } as const;
       onclick={settings.cycleTheme}
     >
       <Icon name={THEME_ICON[settings.theme]} />
+    </button>
+    <button
+      type="button"
+      class="icon-btn"
+      aria-label="Settings"
+      title="Settings"
+      onclick={onsettings}
+    >
+      <Icon name="settings" />
     </button>
     <button
       type="button"
