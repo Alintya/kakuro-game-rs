@@ -2,7 +2,7 @@
 
 Desktop app that generates uniquely solvable Kakuro puzzles and lets you play them. The puzzle model, generator, solver and game state live in Rust (`crates/kakuro-core`); a Tauri 2 shell (`src-tauri`) exposes them over typed IPC (tauri-specta) to a SvelteKit 5 frontend (`src`) that only renders. Progress is auto-saved after every change to `game.json` in the app data directory (`%APPDATA%\dev.kakuro.app` on Windows) and restored on launch.
 
-Sizes: Beginner 6×6, Intermediate 9×9, Expert 12×12, or any custom size from 4×4 to 15×15 (playable cells, excluding the clue row/column).
+Sizes (chosen from the **New game** dialog): Beginner 6×6, Intermediate 9×9, Expert 12×12, or any custom size from 4×4 to 15×15 (playable cells, excluding the clue row/column).
 
 ## Controls
 

@@ -18,6 +18,8 @@ const ARROWS: Record<string, [number, number]> = {
 
 function onkeydown(e: KeyboardEvent) {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+  // A modal (New game) owns the keyboard; Escape must reach it to close it.
+  if (document.querySelector('dialog[open]')) return;
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   // `code`, not `key`: Shift+digit yields symbols in `key` and they vary by layout.
   const digit = /^(?:Digit|Numpad)([0-9])$/.exec(e.code);
@@ -57,7 +59,7 @@ function onkeydown(e: KeyboardEvent) {
     <Grid snapshot={game.snapshot} />
     <DigitPad />
   {:else}
-    <p class="empty">No puzzle yet — choose a size above</p>
+    <p class="empty">No puzzle yet — start a New game above</p>
   {/if}
 </div>
 
