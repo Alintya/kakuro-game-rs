@@ -17,10 +17,21 @@ export const commands = {
 	marks: number[],
 	conflicts: boolean[],
 	solved: boolean,
+	can_undo: boolean,
+	can_redo: boolean,
+	/**  Play time at snapshot time; u32 because u64 has no lossless TS type. */
+	elapsed_ms: number,
+	clock_running: boolean,
 } | null, AppError>(__TAURI_INVOKE("current_game")),
 	setEntry: (index: number, digit: number) => typedError<GameSnapshot, AppError>(__TAURI_INVOKE("set_entry", { index, digit })),
 	toggleMark: (index: number, digit: number) => typedError<GameSnapshot, AppError>(__TAURI_INVOKE("toggle_mark", { index, digit })),
 	clearCell: (index: number) => typedError<GameSnapshot, AppError>(__TAURI_INVOKE("clear_cell", { index })),
+	undo: () => typedError<GameSnapshot, AppError>(__TAURI_INVOKE("undo")),
+	redo: () => typedError<GameSnapshot, AppError>(__TAURI_INVOKE("redo")),
+	/**  Window lost focus or was hidden. */
+	pauseClock: () => typedError<GameSnapshot, AppError>(__TAURI_INVOKE("pause_clock")),
+	/**  Window is active again. */
+	resumeClock: () => typedError<GameSnapshot, AppError>(__TAURI_INVOKE("resume_clock")),
 };
 
 /* Types */
@@ -46,6 +57,11 @@ export type GameSnapshot = {
 	marks: number[],
 	conflicts: boolean[],
 	solved: boolean,
+	can_undo: boolean,
+	can_redo: boolean,
+	/**  Play time at snapshot time; u32 because u64 has no lossless TS type. */
+	elapsed_ms: number,
+	clock_running: boolean,
 };
 
 /**  Requested puzzle size. */
