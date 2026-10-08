@@ -1,12 +1,14 @@
 <script lang="ts">
-import { game, specLabel } from '#lib/game.svelte.js';
+import Icon from '#lib/components/Icon.svelte';
+import SizePicker from '#lib/components/SizePicker.svelte';
+import { game } from '#lib/game.svelte.js';
 import type { PuzzleSpec } from '#lib/ipc/index.js';
 
-const presets: PuzzleSpec[] = [{ kind: 'Beginner' }, { kind: 'Intermediate' }, { kind: 'Expert' }];
-
 let dialog: HTMLDialogElement;
-let rows = $state(8);
-let cols = $state(8);
+
+const replacesProgress = $derived(
+  game.snapshot !== null && !game.snapshot.solved && game.snapshot.entries.some((e) => e > 0),
+);
 
 export function open() {
   dialog.showModal();
@@ -19,92 +21,64 @@ function start(spec: PuzzleSpec) {
 </script>
 
 <dialog bind:this={dialog} closedby="any" aria-labelledby="new-game-title">
-  <h2 id="new-game-title">New game</h2>
+  <header>
+    <h2 id="new-game-title">New game</h2>
+    <button type="button" class="icon-btn" aria-label="Close" onclick={() => dialog.close()}>
+      <Icon name="x" />
+    </button>
+  </header>
 
-  <div class="presets">
-    {#each presets as spec (spec.kind)}
-      <button type="button" onclick={() => start(spec)}>{specLabel(spec)}</button>
-    {/each}
-  </div>
+  {#if replacesProgress}
+    <p class="warn">Your current puzzle will be replaced.</p>
+  {/if}
 
-  <form
-    class="custom"
-    onsubmit={(e) => {
-      e.preventDefault();
-      start({ kind: 'Custom', rows, cols });
-    }}
-  >
-    <span>Custom</span>
-    <input type="number" min="4" max="15" required bind:value={rows} aria-label="Rows" />
-    <span aria-hidden="true">×</span>
-    <input type="number" min="4" max="15" required bind:value={cols} aria-label="Columns" />
-    <button type="submit">Generate</button>
-  </form>
-
-  <button type="button" class="cancel" onclick={() => dialog.close()}>Cancel</button>
+  <SizePicker onpick={start} />
 </dialog>
 
 <style>
   dialog {
-    padding: 16px 20px;
-    border: 1px solid var(--button-border);
-    border-radius: 10px;
-    background: var(--bg);
+    width: min(460px, 92vw);
+    box-sizing: border-box;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
     color: var(--fg);
+    box-shadow: var(--shadow-lg);
+  }
+
+  dialog[open] {
+    animation: dialog-in 160ms ease-out;
   }
 
   dialog::backdrop {
-    background: rgb(0 0 0 / 0.4);
+    background: rgb(0 0 0 / 0.35);
+    backdrop-filter: blur(2px);
+  }
+
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
   }
 
   h2 {
-    margin: 0 0 12px;
-    font-size: 1.1rem;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
   }
 
-  .presets {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .custom {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--button-border);
-  }
-
-  .custom > span:first-child {
-    margin-right: auto;
+  .warn {
+    margin: -6px 0 14px;
     color: var(--muted);
-  }
-
-  button {
-    padding: 6px 12px;
-    border: 1px solid var(--button-border);
-    border-radius: 6px;
-    background: var(--button-bg);
-    cursor: pointer;
-  }
-
-  .cancel {
-    display: block;
-    margin: 12px 0 0 auto;
-    border-color: transparent;
-    background: none;
-    color: var(--muted);
-  }
-
-  input {
-    width: 3.2em;
-    padding: 5px 4px;
-    border: 1px solid var(--button-border);
-    border-radius: 6px;
-    background: var(--button-bg);
-    color: inherit;
-    font: inherit;
+    font-size: 0.9rem;
   }
 </style>

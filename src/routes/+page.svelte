@@ -1,12 +1,31 @@
 <script lang="ts">
 import { onMount } from 'svelte';
-import DigitPad from '#lib/components/DigitPad.svelte';
 import Grid from '#lib/components/Grid.svelte';
-import Toolbar from '#lib/components/Toolbar.svelte';
-import { game } from '#lib/game.svelte.js';
+import Header from '#lib/components/Header.svelte';
+import Icon from '#lib/components/Icon.svelte';
+import NewGameDialog from '#lib/components/NewGameDialog.svelte';
+import SidePanel from '#lib/components/SidePanel.svelte';
+import SizePicker from '#lib/components/SizePicker.svelte';
+import SolvedOverlay from '#lib/components/SolvedOverlay.svelte';
+import { game, specLabel, windowActive } from '#lib/game.svelte.js';
+
+let newGameDialog: NewGameDialog;
+
+function openNewGame() {
+  if (game.generating === null) newGameDialog.open();
+}
 
 onMount(() => {
-  game.init();
+  const sync = () => (windowActive() ? game.resumeClock() : game.pauseClock());
+  window.addEventListener('focus', sync);
+  window.addEventListener('blur', sync);
+  document.addEventListener('visibilitychange', sync);
+  game.init().then(sync);
+  return () => {
+    window.removeEventListener('focus', sync);
+    window.removeEventListener('blur', sync);
+    document.removeEventListener('visibilitychange', sync);
+  };
 });
 
 const ARROWS: Record<string, [number, number]> = {
@@ -20,7 +39,16 @@ function onkeydown(e: KeyboardEvent) {
   if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
   // A modal (New game) owns the keyboard; Escape must reach it to close it.
   if (document.querySelector('dialog[open]')) return;
-  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.ctrlKey || e.metaKey) {
+    if (e.altKey) return;
+    if (e.code === 'KeyZ') (e.shiftKey ? game.redo : game.undo)();
+    else if (e.code === 'KeyY') game.redo();
+    else if (e.code === 'KeyN') openNewGame();
+    else return;
+    e.preventDefault();
+    return;
+  }
+  if (e.altKey) return;
   // `code`, not `key`: Shift+digit yields symbols in `key` and they vary by layout.
   const digit = /^(?:Digit|Numpad)([0-9])$/.exec(e.code);
   if (digit) {
@@ -40,7 +68,7 @@ function onkeydown(e: KeyboardEvent) {
   } else {
     return;
   }
-  // Also keeps Space/Enter from re-activating a focused toolbar button.
+  // Also keeps Space/Enter from re-activating a focused button.
   e.preventDefault();
 }
 </script>
@@ -48,51 +76,168 @@ function onkeydown(e: KeyboardEvent) {
 <svelte:window {onkeydown} />
 
 <div class="app">
-  <Toolbar />
-  {#if game.error}
-    <p class="message error" role="alert">{game.error}</p>
-  {/if}
-  {#if game.snapshot}
-    {#if game.snapshot.solved}
-      <p class="message solved" role="status">Solved!</p>
+  <Header onnewgame={openNewGame} />
+
+  <main class="layout" class:has-panel={game.snapshot !== null}>
+    <section class="board">
+      {#if game.error}
+        <div class="banner" role="alert">
+          {game.error}
+          <button
+            type="button"
+            class="icon-btn"
+            aria-label="Dismiss"
+            onclick={() => (game.error = null)}
+          >
+            <Icon name="x" size={16} />
+          </button>
+        </div>
+      {/if}
+
+      {#if game.snapshot}
+        <div class="grid-wrap" class:dimmed={game.generating !== null}>
+          <Grid snapshot={game.snapshot} />
+        </div>
+        <SolvedOverlay snapshot={game.snapshot} onnewgame={openNewGame} />
+      {:else if game.generating === null}
+        <div class="card welcome">
+          <span class="logo" aria-hidden="true"></span>
+          <h1>Welcome to Kakuro</h1>
+          <p>
+            Fill every white cell with 1–9 so each run adds up to its clue, without repeating a digit
+            within a run.
+          </p>
+          <SizePicker onpick={game.newGame} />
+        </div>
+      {/if}
+
+      {#if game.generating}
+        <div class="card generating" role="status">
+          <span class="spinner"></span>
+          Generating {specLabel(game.generating)}…
+        </div>
+      {/if}
+    </section>
+
+    {#if game.snapshot}
+      <SidePanel />
     {/if}
-    <Grid snapshot={game.snapshot} />
-    <DigitPad />
-  {:else}
-    <p class="empty">No puzzle yet — start a New game above</p>
-  {/if}
+  </main>
 </div>
+
+<NewGameDialog bind:this={newGameDialog} />
 
 <style>
   .app {
-    min-height: 100vh;
-    box-sizing: border-box;
-    padding: 12px 24px 24px;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    min-height: 0;
+    padding: 0 24px 24px;
+  }
+
+  .layout.has-panel {
+    grid-template-columns: minmax(0, 1fr) clamp(250px, 27vw, 310px);
+  }
+
+  @media (max-width: 760px) {
+    .layout.has-panel {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) auto;
+    }
+  }
+
+  /* Size container for the grid's cq units. */
+  .board {
+    container-type: size;
+    position: relative;
+    min-height: 0;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
   }
 
-  .message {
-    margin: 0;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-weight: 600;
+  .grid-wrap {
+    transition:
+      opacity 150ms,
+      filter 150ms;
   }
 
-  .error {
-    color: var(--conflict);
+  .grid-wrap.dimmed {
+    opacity: 0.35;
+    filter: blur(1px);
+  }
+
+  .banner {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 90%;
+    padding: 6px 6px 6px 14px;
+    border-radius: var(--radius-sm);
     background: var(--conflict-soft);
+    color: var(--conflict);
+    font-weight: 600;
+    transform: translateX(-50%);
   }
 
-  .solved {
-    color: var(--success);
-    font-size: 1.2rem;
+  .banner .icon-btn {
+    width: 26px;
+    height: 26px;
+    color: inherit;
   }
 
-  .empty {
-    margin-top: 20vh;
+  .generating {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    box-shadow: var(--shadow-lg);
+    font-weight: 500;
+  }
+
+  .welcome {
+    max-width: 560px;
+    padding: 28px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .welcome .logo {
+    display: block;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    box-shadow: inset 0 0 0 1px var(--border);
+    background: linear-gradient(
+      to bottom left,
+      var(--block) 47%,
+      var(--accent) 47% 53%,
+      var(--block) 53%
+    );
+  }
+
+  .welcome h1 {
+    margin: 16px 0 6px;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+  }
+
+  .welcome p {
+    margin: 0 0 20px;
     color: var(--muted);
+    line-height: 1.5;
   }
 </style>
