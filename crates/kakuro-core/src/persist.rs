@@ -20,7 +20,8 @@ pub fn save(path: &Path, state: &GameState) -> Result<(), AppError> {
 }
 
 /// Loads a saved game. A missing, unparsable or inconsistent file yields
-/// `Ok(None)` so the app starts fresh; other I/O failures are errors.
+/// `Ok(None)` so the app starts fresh; other I/O failures are errors. An
+/// undo/redo history touching non-playable cells is dropped, keeping progress.
 pub fn load(path: &Path) -> Result<Option<GameState>, AppError> {
     let text = match fs::read_to_string(path) {
         Ok(text) => text,
@@ -28,7 +29,14 @@ pub fn load(path: &Path) -> Result<Option<GameState>, AppError> {
         Err(e) => return Err(e.into()),
     };
     match serde_json::from_str::<GameState>(&text) {
-        Ok(state) if is_consistent(&state) => Ok(Some(state)),
+        Ok(mut state) if sizes_match(&state) => {
+            if !history_valid(&state) {
+                tracing::warn!(path = %path.display(), "dropping invalid undo/redo history");
+                state.undo.clear();
+                state.redo.clear();
+            }
+            Ok(Some(state))
+        }
         Ok(_) => {
             tracing::warn!(path = %path.display(), "ignoring save with mismatched grid sizes");
             Ok(None)
@@ -40,21 +48,23 @@ pub fn load(path: &Path) -> Result<Option<GameState>, AppError> {
     }
 }
 
-fn is_consistent(state: &GameState) -> bool {
+fn sizes_match(state: &GameState) -> bool {
     let n = usize::from(state.puzzle.rows) * usize::from(state.puzzle.cols);
-    let sizes_match = [
+    [
         state.puzzle.cells.len(),
         state.puzzle.solution.len(),
         state.entries.len(),
         state.marks.len(),
     ]
     .iter()
-    .all(|&len| len == n);
-    // Undo/redo must only ever touch playable cells.
-    sizes_match
-        && state
-            .undo
-            .iter()
-            .chain(&state.redo)
-            .all(|edit| state.puzzle.cells.get(edit.index) == Some(&Cell::White))
+    .all(|&len| len == n)
+}
+
+/// Undo/redo must only ever touch playable cells.
+fn history_valid(state: &GameState) -> bool {
+    state
+        .undo
+        .iter()
+        .chain(&state.redo)
+        .all(|edit| state.puzzle.cells.get(edit.index) == Some(&Cell::White))
 }
