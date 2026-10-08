@@ -40,15 +40,16 @@ pub fn export_bindings() {
         .expect("failed to export typescript bindings");
 }
 
-/// Banks the play clock and saves on shutdown, when the page can no longer call IPC.
-fn save_on_exit(state: &AppState) {
+/// Banks the play clock and saves. Runs when the window closes (earliest reliable point;
+/// the page can no longer call IPC) and again on app exit for other shutdown paths.
+fn bank_and_save(state: &AppState) {
     let Ok(mut guard) = state.game.lock() else {
         return;
     };
     if let Some(game) = guard.as_mut() {
         game.pause_clock(Instant::now());
         if let Err(e) = kakuro_core::save(&state.save_path, game) {
-            tracing::error!(error = %e, "could not save game on exit");
+            tracing::error!(error = %e, "could not save game on shutdown");
         }
     }
 }
@@ -80,13 +81,20 @@ pub fn run() {
             });
             Ok(())
         })
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { .. } = event
+                && let Some(state) = window.try_state::<AppState>()
+            {
+                bank_and_save(&state);
+            }
+        })
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app, event| {
             if let tauri::RunEvent::Exit = event
                 && let Some(state) = app.try_state::<AppState>()
             {
-                save_on_exit(&state);
+                bank_and_save(&state);
             }
         });
 }
