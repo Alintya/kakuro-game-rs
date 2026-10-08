@@ -3,7 +3,7 @@ use std::fs;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
-use crate::{AppError, GameState};
+use crate::{AppError, Cell, GameState};
 
 /// Atomically writes `state` as JSON to `path` (via `<path>.tmp` + rename).
 pub fn save(path: &Path, state: &GameState) -> Result<(), AppError> {
@@ -42,12 +42,19 @@ pub fn load(path: &Path) -> Result<Option<GameState>, AppError> {
 
 fn is_consistent(state: &GameState) -> bool {
     let n = usize::from(state.puzzle.rows) * usize::from(state.puzzle.cols);
-    [
+    let sizes_match = [
         state.puzzle.cells.len(),
         state.puzzle.solution.len(),
         state.entries.len(),
         state.marks.len(),
     ]
     .iter()
-    .all(|&len| len == n)
+    .all(|&len| len == n);
+    // Undo/redo must only ever touch playable cells.
+    sizes_match
+        && state
+            .undo
+            .iter()
+            .chain(&state.redo)
+            .all(|edit| state.puzzle.cells.get(edit.index) == Some(&Cell::White))
 }

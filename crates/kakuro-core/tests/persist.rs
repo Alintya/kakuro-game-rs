@@ -46,3 +46,33 @@ fn corrupt_or_inconsistent_file_loads_as_no_game() {
     fs::write(&path, serde_json::to_string(&game).unwrap()).unwrap();
     assert_eq!(load(&path).unwrap(), None);
 }
+
+#[test]
+fn save_without_history_or_clock_still_loads() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("game.json");
+    let game = game_in_progress();
+    let mut value = serde_json::to_value(&game).unwrap();
+    let object = value.as_object_mut().unwrap();
+    for key in ["undo", "redo", "banked_ms"] {
+        assert!(object.remove(key).is_some(), "{key} is saved");
+    }
+    fs::write(&path, value.to_string()).unwrap();
+
+    let loaded = load(&path).unwrap().expect("old save loads");
+    assert_eq!((&loaded.entries, &loaded.marks), (&game.entries, &game.marks));
+    let snap = loaded.snapshot();
+    assert!(!snap.can_undo);
+    assert_eq!(snap.elapsed_ms, 0);
+}
+
+#[test]
+fn history_pointing_at_a_block_is_rejected() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("game.json");
+    let mut value = serde_json::to_value(game_in_progress()).unwrap();
+    // Cell 0 (top-left corner) is always a block.
+    value["undo"][0]["index"] = 0.into();
+    fs::write(&path, value.to_string()).unwrap();
+    assert_eq!(load(&path).unwrap(), None);
+}

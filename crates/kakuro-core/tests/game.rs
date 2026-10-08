@@ -1,3 +1,5 @@
+use std::time::{Duration, Instant};
+
 use kakuro_core::{AppError, Cell, GameState, PuzzleSpec, Run, generate};
 
 fn game() -> GameState {
@@ -137,4 +139,80 @@ fn snapshot_carries_puzzle_and_progress() {
     assert_eq!((snap.rows, snap.cols), (7, 7));
     assert_eq!(snap.cells, g.puzzle.cells);
     assert_eq!(snap.entries[cell], 5);
+}
+
+#[test]
+fn undo_and_redo_walk_cell_history() {
+    let mut g = game();
+    let run = find_run(&g, |r| r.cells.len() >= 2);
+    let (a, b) = (run.cells[0], run.cells[1]);
+    g.set_entry(a, 5).unwrap();
+    g.toggle_mark(a, 2).unwrap();
+
+    assert!(g.undo());
+    assert_eq!((g.entries[a], g.marks[a]), (5, 0));
+    assert!(g.undo());
+    assert_eq!((g.entries[a], g.marks[a]), (0, 0));
+    assert!(!g.undo(), "history exhausted");
+    let snap = g.snapshot();
+    assert!(!snap.can_undo && snap.can_redo);
+
+    assert!(g.redo());
+    assert_eq!((g.entries[a], g.marks[a]), (5, 0));
+    g.set_entry(b, 3).unwrap();
+    assert!(!g.snapshot().can_redo, "a new edit drops the redo branch");
+    assert!(!g.redo());
+}
+
+#[test]
+fn no_op_edits_are_not_recorded() {
+    let mut g = game();
+    let a = find_run(&g, |_| true).cells[0];
+    g.clear_cell(a).unwrap();
+    assert!(!g.snapshot().can_undo);
+    g.set_entry(a, 4).unwrap();
+    g.set_entry(a, 4).unwrap();
+    assert!(g.undo());
+    assert_eq!(g.entries[a], 0);
+    assert!(!g.snapshot().can_undo);
+}
+
+#[test]
+fn clock_runs_only_between_resume_and_pause() {
+    let mut g = game();
+    let t0 = Instant::now();
+    let at = |secs| t0 + Duration::from_secs(secs);
+    g.resume_clock(t0);
+    assert!(g.clock_running());
+    assert_eq!(g.elapsed_ms(at(5)), 5000);
+    g.pause_clock(at(5));
+    assert!(!g.clock_running());
+    assert_eq!(g.elapsed_ms(at(60)), 5000);
+    g.resume_clock(at(60));
+    assert_eq!(g.elapsed_ms(at(61)), 6000);
+    // Resuming while running only banks the span.
+    g.resume_clock(at(61));
+    assert_eq!(g.elapsed_ms(at(62)), 7000);
+}
+
+#[test]
+fn solving_stops_the_clock() {
+    let mut g = game();
+    let t0 = Instant::now();
+    let at = |secs| t0 + Duration::from_secs(secs);
+    g.resume_clock(t0);
+    let solution = g.puzzle.solution.clone();
+    for i in 0..solution.len() {
+        if g.puzzle.cells[i] == Cell::White {
+            g.set_entry(i, solution[i]).unwrap();
+        }
+    }
+    g.resume_clock(at(10));
+    assert!(!g.clock_running());
+    assert_eq!(g.elapsed_ms(at(99)), 10_000);
+
+    assert!(g.undo());
+    g.resume_clock(at(20));
+    assert!(g.clock_running(), "unsolved again");
+    assert_eq!(g.elapsed_ms(at(21)), 11_000);
 }
