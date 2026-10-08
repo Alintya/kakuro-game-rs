@@ -1,5 +1,6 @@
 import { type AppError, commands, type GameSnapshot, type PuzzleSpec } from '#lib/ipc/index.js';
 import { findRuns, runsByCell } from '#lib/runs.js';
+import { settings } from '#lib/settings.svelte.js';
 
 type IpcResult<T> = { status: 'ok'; data: T } | { status: 'error'; error: AppError };
 
@@ -35,11 +36,6 @@ export function formatTime(ms: number): string {
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
 }
 
-/** The play clock runs only while the window is visible and focused. */
-export function windowActive(): boolean {
-  return document.visibilityState === 'visible' && document.hasFocus();
-}
-
 function firstWhite(snapshot: GameSnapshot): number | null {
   const index = snapshot.cells.findIndex((cell) => cell.kind === 'White');
   return index === -1 ? null : index;
@@ -63,6 +59,8 @@ class Game {
   /** Puzzle being generated, if any; cell commands are ignored meanwhile. */
   generating = $state.raw<PuzzleSpec | null>(null);
   error = $state<string | null>(null);
+  /** Window minimized or hidden; kept current by the page from window events. */
+  windowHidden = $state(false);
 
   runs = $derived(this.snapshot ? findRuns(this.snapshot) : []);
   runsAt = $derived(runsByCell(this.runs, this.snapshot?.cells.length ?? 0));
@@ -96,8 +94,6 @@ class Game {
     } finally {
       this.generating = null;
     }
-    // The backend starts the clock with the new game.
-    if (!windowActive()) await this.pauseClock();
   };
 
   private async run(call: () => Promise<IpcResult<GameSnapshot>>): Promise<GameSnapshot | null> {
@@ -138,16 +134,16 @@ class Game {
     if (index !== null) this.selected = index;
   }
 
-  resumeClock = async () => {
+  /**
+   * Brings the backend clock in line with the UI: running unless solved, or paused while the
+   * window is minimized when that setting is on. No IPC when it already matches.
+   */
+  syncClock = async () => {
     const s = this.snapshot;
-    if (s === null || this.generating !== null || s.solved || s.clock_running) return;
-    await this.run(commands.resumeClock);
-  };
-
-  pauseClock = async () => {
-    const s = this.snapshot;
-    if (s === null || this.generating !== null || !s.clock_running) return;
-    await this.run(commands.pauseClock);
+    if (s === null || this.generating !== null) return;
+    const shouldRun = !s.solved && !(settings.pauseWhenMinimized && this.windowHidden);
+    if (shouldRun === s.clock_running) return;
+    await this.run(shouldRun ? commands.resumeClock : commands.pauseClock);
   };
 
   select = (index: number) => {

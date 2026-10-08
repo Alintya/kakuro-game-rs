@@ -1,17 +1,37 @@
 <script lang="ts">
 import Icon from '#lib/components/Icon.svelte';
-import { type Aid, settings } from '#lib/settings.svelte.js';
+import { type Flag, settings } from '#lib/settings.svelte.js';
 
-const AIDS: { aid: Aid; title: string; detail: string }[] = [
+type Row = { flag: Flag; title: string; detail: string };
+
+const SECTIONS: { id: string; heading: string; note?: string; rows: Row[] }[] = [
   {
-    aid: 'showCombinations',
-    title: 'Combinations panel',
-    detail: "Lists the digit sets that fit the selected cell's runs.",
+    id: 'aids',
+    heading: 'Solving aids',
+    note: 'Off by default, so the puzzle is yours alone to crack.',
+    rows: [
+      {
+        flag: 'showCombinations',
+        title: 'Combinations panel',
+        detail: "Lists the digit sets that fit the selected cell's runs.",
+      },
+      {
+        flag: 'dimDigits',
+        title: 'Dim impossible digits',
+        detail: 'Fades digit pad keys that cannot go in the selected cell.',
+      },
+    ],
   },
   {
-    aid: 'dimDigits',
-    title: 'Dim impossible digits',
-    detail: 'Fades digit pad keys that cannot go in the selected cell.',
+    id: 'timer',
+    heading: 'Timer',
+    rows: [
+      {
+        flag: 'pauseWhenMinimized',
+        title: 'Pause when minimized',
+        detail: 'Stops the clock while the window is minimized or hidden.',
+      },
+    ],
   },
 ];
 
@@ -30,30 +50,38 @@ export function open() {
     </button>
   </header>
 
-  <section aria-labelledby="aids-title">
-    <h3 id="aids-title">Solving aids</h3>
-    <p class="note">Off by default, so the puzzle is yours alone to crack.</p>
-    {#each AIDS as { aid, title, detail } (aid)}
-      <label class="row">
-        <span>
-          <span class="title">{title}</span>
-          <span class="detail">{detail}</span>
-        </span>
-        <input
-          type="checkbox"
-          role="switch"
-          class="switch"
-          checked={settings[aid]}
-          onchange={(e) => settings.setAid(aid, e.currentTarget.checked)}
-        />
-      </label>
-    {/each}
-  </section>
+  {#each SECTIONS as { id, heading, note, rows } (id)}
+    <section aria-labelledby={`${id}-title`}>
+      <h3 id={`${id}-title`}>{heading}</h3>
+      {#if note}
+        <p class="note">{note}</p>
+      {/if}
+      {#each rows as { flag, title, detail } (flag)}
+        <label class="row">
+          <span>
+            <span class="title">{title}</span>
+            <span class="detail">{detail}</span>
+          </span>
+          <input
+            type="checkbox"
+            role="switch"
+            class="switch"
+            checked={settings[flag]}
+            onchange={(e) => settings.setFlag(flag, e.currentTarget.checked)}
+          />
+        </label>
+      {/each}
+    </section>
+  {/each}
 </dialog>
 
 <style>
+  section + section {
+    margin-top: 18px;
+  }
+
   h3 {
-    margin: 0;
+    margin: 0 0 8px;
     color: var(--muted);
     font-size: 0.8rem;
     font-weight: 600;
@@ -62,7 +90,7 @@ export function open() {
   }
 
   .note {
-    margin: 4px 0 8px;
+    margin: -4px 0 8px;
     color: var(--muted);
     font-size: 0.9rem;
   }

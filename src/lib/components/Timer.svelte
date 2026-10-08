@@ -27,7 +27,7 @@ const paused = $derived(!snapshot.clock_running && !snapshot.solved);
   class:solved={snapshot.solved}
   role="timer"
   aria-label="Elapsed time"
-  title={paused ? 'Paused — resumes when the window is focused' : undefined}
+  title={paused ? 'Paused — resumes when the window is restored' : undefined}
 >
   <Icon name={paused ? 'pause' : 'clock'} size={15} />
   {formatTime(elapsed)}

@@ -3,12 +3,19 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 export type ThemePref = 'system' | 'light' | 'dark';
 
 const THEME_KEY = 'kakuro.theme';
-/** Solving aids are opt-in; stored as 'true' once enabled in Settings. */
-const AID_KEYS = {
-  showCombinations: 'kakuro.aid.combinations',
-  dimDigits: 'kakuro.aid.dimDigits',
+/** Boolean preferences: localStorage key and value until the user changes it. */
+const FLAGS = {
+  /** Solving aids are opt-in. */
+  showCombinations: { key: 'kakuro.aid.combinations', initial: false },
+  dimDigits: { key: 'kakuro.aid.dimDigits', initial: false },
+  pauseWhenMinimized: { key: 'kakuro.pauseWhenMinimized', initial: true },
 } as const;
-export type Aid = keyof typeof AID_KEYS;
+export type Flag = keyof typeof FLAGS;
+
+function readFlag(flag: Flag): boolean {
+  const stored = localStorage.getItem(FLAGS[flag].key);
+  return stored === null ? FLAGS[flag].initial : stored === 'true';
+}
 const NEXT: Record<ThemePref, ThemePref> = { system: 'light', light: 'dark', dark: 'system' };
 
 export const THEME_LABEL: Record<ThemePref, string> = {
@@ -35,9 +42,11 @@ function applyTheme(pref: ThemePref) {
 class Settings {
   theme = $state<ThemePref>(readTheme());
   /** Combinations panel for the selected cell's runs. */
-  showCombinations = $state(localStorage.getItem(AID_KEYS.showCombinations) === 'true');
+  showCombinations = $state(readFlag('showCombinations'));
   /** Fade pad digits that cannot go in the selected cell. */
-  dimDigits = $state(localStorage.getItem(AID_KEYS.dimDigits) === 'true');
+  dimDigits = $state(readFlag('dimDigits'));
+  /** Stop the play clock while the window is minimized or hidden. */
+  pauseWhenMinimized = $state(readFlag('pauseWhenMinimized'));
 
   cycleTheme = () => {
     this.theme = NEXT[this.theme];
@@ -45,9 +54,9 @@ class Settings {
     applyTheme(this.theme);
   };
 
-  setAid = (aid: Aid, on: boolean) => {
-    this[aid] = on;
-    localStorage.setItem(AID_KEYS[aid], String(on));
+  setFlag = (flag: Flag, on: boolean) => {
+    this[flag] = on;
+    localStorage.setItem(FLAGS[flag].key, String(on));
   };
 }
 
