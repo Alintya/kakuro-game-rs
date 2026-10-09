@@ -29,6 +29,7 @@ tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
 # Tauri
 tauri = { version = "2", features = ["specta"] }
 tauri-build = "2"
+tauri-plugin-clipboard-manager = "2"
 
 # Testing
 tempfile = "3"

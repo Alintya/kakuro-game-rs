@@ -1,4 +1,5 @@
 <script lang="ts">
+import CopyCodeButton from '#lib/components/CopyCodeButton.svelte';
 import Icon from '#lib/components/Icon.svelte';
 import { formatTime, specLabel } from '#lib/game.svelte.js';
 import type { GameSnapshot } from '#lib/ipc/index.js';
@@ -36,6 +37,7 @@ $effect(() => {
         >
           New game
         </button>
+        <CopyCodeButton label="Copy code" />
         <button type="button" class="btn btn-ghost" onclick={() => (dismissed = true)}>
           View grid
         </button>

@@ -39,7 +39,8 @@ pub struct GameState {
 #[derive(Clone, Debug, Serialize, Type)]
 pub struct GameSnapshot {
     pub spec: PuzzleSpec,
-    pub seed: u32,
+    /// Share code reproducing the puzzle, e.g. `expert-2874619203-a7f3`.
+    pub code: String,
     pub rows: u8,
     pub cols: u8,
     pub cells: Vec<Cell>,
@@ -155,7 +156,7 @@ impl GameState {
         }
         GameSnapshot {
             spec: self.puzzle.spec,
-            seed: self.puzzle.seed,
+            code: self.puzzle.code(),
             rows: self.puzzle.rows,
             cols: self.puzzle.cols,
             cells: self.puzzle.cells.clone(),

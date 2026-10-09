@@ -1,7 +1,7 @@
 use std::sync::MutexGuard;
 use std::time::Instant;
 
-use kakuro_core::{AppError, GameSnapshot, GameState, PuzzleSpec, generate};
+use kakuro_core::{AppError, GameSnapshot, GameState, Puzzle, PuzzleSpec, ShareCode, generate};
 
 use crate::AppState;
 
@@ -38,6 +38,17 @@ fn edit(
     })
 }
 
+/// Replaces the current game with a fresh one for `puzzle` and starts its clock.
+fn start(state: &AppState, puzzle: Puzzle) -> Result<GameSnapshot, AppError> {
+    let mut game = GameState::new(puzzle);
+    game.resume_clock(Instant::now());
+    // Save first so a failed save leaves the previous game untouched.
+    kakuro_core::save(&state.save_path, &game)?;
+    let snapshot = game.snapshot();
+    *lock(state)? = Some(game);
+    Ok(snapshot)
+}
+
 /// Generates a fresh puzzle (random seed) and replaces the current game.
 #[tauri::command]
 #[specta::specta]
@@ -49,13 +60,21 @@ pub async fn new_game(
     let puzzle = tauri::async_runtime::spawn_blocking(move || generate(spec, seed))
         .await
         .map_err(|e| AppError::Internal(e.to_string()))??;
-    let mut game = GameState::new(puzzle);
-    game.resume_clock(Instant::now());
-    // Save first so a failed save leaves the previous game untouched.
-    kakuro_core::save(&state.save_path, &game)?;
-    let snapshot = game.snapshot();
-    *lock(&state)? = Some(game);
-    Ok(snapshot)
+    start(&state, puzzle)
+}
+
+/// Starts the puzzle a share code describes, replacing the current game.
+#[tauri::command]
+#[specta::specta]
+pub async fn open_code(
+    code: String,
+    state: tauri::State<'_, AppState>,
+) -> Result<GameSnapshot, AppError> {
+    let share = ShareCode::parse(&code)?;
+    let puzzle = tauri::async_runtime::spawn_blocking(move || share.open())
+        .await
+        .map_err(|e| AppError::Internal(e.to_string()))??;
+    start(&state, puzzle)
 }
 
 /// The game restored on launch or started since, if any.

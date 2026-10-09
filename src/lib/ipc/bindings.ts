@@ -6,10 +6,13 @@ import { invoke as __TAURI_INVOKE } from "@tauri-apps/api/core";
 export const commands = {
 	/**  Generates a fresh puzzle (random seed) and replaces the current game. */
 	newGame: (spec: PuzzleSpec) => typedError<GameSnapshot, AppError>(__TAURI_INVOKE("new_game", { spec })),
+	/**  Starts the puzzle a share code describes, replacing the current game. */
+	openCode: (code: string) => typedError<GameSnapshot, AppError>(__TAURI_INVOKE("open_code", { code })),
 	/**  The game restored on launch or started since, if any. */
 	currentGame: () => typedError<{
 	spec: PuzzleSpec,
-	seed: number,
+	/**  Share code reproducing the puzzle, e.g. `expert-2874619203-a7f3`. */
+	code: string,
 	rows: number,
 	cols: number,
 	cells: Cell[],
@@ -49,7 +52,8 @@ export type Cell = { kind: "White" } |
 /**  Everything the frontend renders. Never contains the solution. */
 export type GameSnapshot = {
 	spec: PuzzleSpec,
-	seed: number,
+	/**  Share code reproducing the puzzle, e.g. `expert-2874619203-a7f3`. */
+	code: string,
 	rows: number,
 	cols: number,
 	cells: Cell[],

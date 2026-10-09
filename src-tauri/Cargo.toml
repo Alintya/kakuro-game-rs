@@ -17,6 +17,7 @@ tauri-build = { workspace = true, features = [] }
 kakuro-core = { workspace = true }
 rand = { workspace = true }
 tauri = { workspace = true, features = [] }
+tauri-plugin-clipboard-manager = { workspace = true }
 tauri-specta = { workspace = true }
 specta = { workspace = true }
 specta-typescript = { workspace = true }

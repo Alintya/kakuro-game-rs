@@ -135,7 +135,8 @@ fn snapshot_carries_puzzle_and_progress() {
     let cell = find_run(&g, |_| true).cells[0];
     g.set_entry(cell, 5).unwrap();
     let snap = g.snapshot();
-    assert_eq!((snap.spec, snap.seed), (PuzzleSpec::Beginner, 1));
+    assert_eq!(snap.spec, PuzzleSpec::Beginner);
+    assert!(snap.code.starts_with("beginner-1-"), "code {}", snap.code);
     assert_eq!((snap.rows, snap.cols), (7, 7));
     assert_eq!(snap.cells, g.puzzle.cells);
     assert_eq!(snap.entries[cell], 5);

@@ -18,6 +18,15 @@ function start(spec: PuzzleSpec) {
   dialog.close();
   game.newGame(spec);
 }
+
+let code = $state('');
+
+/** Keeps the text on failure so a typo can be fixed once the error banner reports it. */
+async function openCode() {
+  const c = code.trim();
+  dialog.close();
+  if (await game.openCode(c)) code = '';
+}
 </script>
 
 <dialog bind:this={dialog} class="modal" closedby="any" aria-labelledby="new-game-title">
@@ -33,6 +42,27 @@ function start(spec: PuzzleSpec) {
   {/if}
 
   <SizePicker onpick={start} />
+
+  <form
+    class="code"
+    onsubmit={(e) => {
+      e.preventDefault();
+      openCode();
+    }}
+  >
+    <label class="code-label" for="share-code">Puzzle code</label>
+    <input
+      id="share-code"
+      type="text"
+      bind:value={code}
+      placeholder="expert-2874619203-a7f3"
+      spellcheck="false"
+      autocomplete="off"
+      autocapitalize="off"
+      required
+    />
+    <button type="submit" class="btn" disabled={code.trim() === ''}>Open</button>
+  </form>
 </dialog>
 
 <style>
@@ -40,5 +70,28 @@ function start(spec: PuzzleSpec) {
     margin: -6px 0 14px;
     color: var(--muted);
     font-size: 0.9rem;
+  }
+
+  .code {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .code-label {
+    color: var(--muted);
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-variant-numeric: tabular-nums;
   }
 </style>

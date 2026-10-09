@@ -10,7 +10,7 @@ import SettingsDialog from '#lib/components/SettingsDialog.svelte';
 import SidePanel from '#lib/components/SidePanel.svelte';
 import SizePicker from '#lib/components/SizePicker.svelte';
 import SolvedOverlay from '#lib/components/SolvedOverlay.svelte';
-import { game, specLabel } from '#lib/game.svelte.js';
+import { game } from '#lib/game.svelte.js';
 import { appWindow } from '#lib/window.js';
 
 let newGameDialog: NewGameDialog;
@@ -133,7 +133,7 @@ function onkeydown(e: KeyboardEvent) {
       {#if game.generating}
         <div class="card generating" role="status">
           <span class="spinner"></span>
-          Generating {specLabel(game.generating)}…
+          {game.generating}
         </div>
       {/if}
     </section>

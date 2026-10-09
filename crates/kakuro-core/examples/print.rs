@@ -7,21 +7,6 @@ use std::time::Instant;
 
 use kakuro_core::{Cell, Puzzle, PuzzleSpec, generate, solve};
 
-fn parse_spec(arg: &str) -> Option<PuzzleSpec> {
-    match arg.to_ascii_lowercase().as_str() {
-        "beginner" => Some(PuzzleSpec::Beginner),
-        "intermediate" => Some(PuzzleSpec::Intermediate),
-        "expert" => Some(PuzzleSpec::Expert),
-        other => {
-            let (rows, cols) = other.split_once('x')?;
-            Some(PuzzleSpec::Custom {
-                rows: rows.parse().ok()?,
-                cols: cols.parse().ok()?,
-            })
-        }
-    }
-}
-
 fn print_grid(puzzle: &Puzzle, white: impl Fn(usize) -> String) {
     for r in 0..puzzle.rows as usize {
         let line: Vec<String> = (0..puzzle.cols as usize)
@@ -46,7 +31,7 @@ fn print_grid(puzzle: &Puzzle, white: impl Fn(usize) -> String) {
 
 fn main() -> ExitCode {
     let mut args = std::env::args().skip(1);
-    let Some(spec) = args.next().as_deref().and_then(parse_spec) else {
+    let Some(spec) = args.next().and_then(|s| s.parse::<PuzzleSpec>().ok()) else {
         eprintln!("usage: print <beginner|intermediate|expert|RxC> [seed]");
         return ExitCode::FAILURE;
     };
@@ -70,7 +55,8 @@ fn main() -> ExitCode {
         }
     };
     println!(
-        "{spec:?} seed {seed}: generated in {} ms\n",
+        "{spec:?} seed {seed} — code {}: generated in {} ms\n",
+        puzzle.code(),
         start.elapsed().as_millis()
     );
 

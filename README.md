@@ -4,6 +4,8 @@ Desktop app that generates uniquely solvable Kakuro puzzles and lets you play th
 
 Sizes (chosen from the **New game** dialog): Beginner 6×6, Intermediate 9×9, Expert 12×12, or any custom size from 4×4 to 15×15 (playable cells, excluding the clue row/column).
 
+To play the same puzzle as someone else, share its **puzzle code** (e.g. `expert-2874619203-a7f3`: size, seed, and a 4-digit check). Click the code next to the size in the header, or **Copy code** on the solved card, to copy it; paste it into **Puzzle code** in the **New game** dialog and press **Open** to start that puzzle. Generation is deterministic, so the code regenerates the identical grid; the check digits catch typos and codes from an app version whose generator produces a different grid.
+
 ## Controls
 
 | Input | Action |

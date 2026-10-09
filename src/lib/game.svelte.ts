@@ -1,3 +1,4 @@
+import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { type AppError, commands, type GameSnapshot, type PuzzleSpec } from '#lib/ipc/index.js';
 import { findRuns, runsByCell } from '#lib/runs.js';
 import { settings } from '#lib/settings.svelte.js';
@@ -56,8 +57,8 @@ class Game {
   snapshotAt = $state(0);
   selected = $state<number | null>(null);
   pencil = $state(false);
-  /** Puzzle being generated, if any; cell commands are ignored meanwhile. */
-  generating = $state.raw<PuzzleSpec | null>(null);
+  /** Status shown while a puzzle is generated or opened; cell commands are ignored meanwhile. */
+  generating = $state.raw<string | null>(null);
   error = $state<string | null>(null);
   /** Window minimized or hidden; kept current by the page from window events. */
   windowHidden = $state(false);
@@ -80,19 +81,42 @@ class Game {
     }
   };
 
-  newGame = async (spec: PuzzleSpec) => {
-    this.generating = spec;
+  /** Replaces the game; returns whether it succeeded (errors land in `error`). */
+  private async start(
+    status: string,
+    call: () => Promise<IpcResult<GameSnapshot>>,
+  ): Promise<boolean> {
+    this.generating = status;
     try {
-      const res = await commands.newGame(spec);
+      const res = await call();
       if (res.status === 'ok') {
         this.setSnapshot(res.data);
         this.selected = firstWhite(res.data);
         this.error = null;
-      } else {
-        this.error = formatError(res.error);
+        return true;
       }
+      this.error = formatError(res.error);
+      return false;
     } finally {
       this.generating = null;
+    }
+  }
+
+  newGame = (spec: PuzzleSpec) =>
+    this.start(`Generating ${specLabel(spec)}…`, () => commands.newGame(spec));
+
+  /** Starts the puzzle a share code describes. */
+  openCode = (code: string) => this.start(`Opening ${code}…`, () => commands.openCode(code));
+
+  /** Copies the current puzzle's share code; returns whether it worked (errors land in `error`). */
+  copyCode = async (): Promise<boolean> => {
+    if (this.snapshot === null) return false;
+    try {
+      await writeText(this.snapshot.code);
+      return true;
+    } catch (e) {
+      this.error = `Could not copy the code: ${formatError(e)}`;
+      return false;
     }
   };
 

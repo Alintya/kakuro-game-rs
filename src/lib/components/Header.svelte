@@ -2,6 +2,7 @@
 import { onMount } from 'svelte';
 // Same artwork as the taskbar icon; `no-inline` because the CSP has no `data:` image source.
 import appIcon from '#icons/app-icon-small.svg?no-inline';
+import CopyCodeButton from '#lib/components/CopyCodeButton.svelte';
 import Icon from '#lib/components/Icon.svelte';
 import Timer from '#lib/components/Timer.svelte';
 import WindowControls from '#lib/components/WindowControls.svelte';
@@ -54,9 +55,9 @@ function onmousedown(e: MouseEvent) {
 
   <div class="meta">
     {#if game.generating}
-      Generating {specLabel(game.generating)}…
+      {game.generating}
     {:else if game.snapshot}
-      {specLabel(game.snapshot.spec)} <span class="seed">#{game.snapshot.seed}</span>
+      {specLabel(game.snapshot.spec)} <CopyCodeButton chip label={game.snapshot.code} />
     {/if}
   </div>
 
@@ -147,11 +148,6 @@ function onmousedown(e: MouseEvent) {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     text-overflow: ellipsis;
-  }
-
-  .seed {
-    font-size: 0.85em;
-    opacity: 0.7;
   }
 
   .actions {

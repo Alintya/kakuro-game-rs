@@ -10,6 +10,7 @@ mod generator;
 mod layout;
 mod persist;
 mod puzzle;
+mod share;
 mod solver;
 
 pub use error::AppError;
@@ -17,4 +18,5 @@ pub use game::{GameSnapshot, GameState};
 pub use generator::generate;
 pub use persist::{load, save};
 pub use puzzle::{Cell, Puzzle, PuzzleSpec, Run, max_run};
+pub use share::ShareCode;
 pub use solver::solve;

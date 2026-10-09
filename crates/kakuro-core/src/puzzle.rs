@@ -1,7 +1,11 @@
+use std::fmt;
+use std::str::FromStr;
+
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::AppError;
+use crate::share::{ShareCode, not_a_code};
 
 /// Smallest/largest playable interior dimension for custom puzzles.
 const MIN_DIM: u8 = 4;
@@ -33,6 +37,39 @@ impl PuzzleSpec {
                         "rows and cols must be {MIN_DIM}..={MAX_DIM}"
                     )))
                 }
+            }
+        }
+    }
+}
+
+/// Share-code form: `beginner`, `intermediate`, `expert` or `{rows}x{cols}`.
+impl fmt::Display for PuzzleSpec {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Beginner => f.write_str("beginner"),
+            Self::Intermediate => f.write_str("intermediate"),
+            Self::Expert => f.write_str("expert"),
+            Self::Custom { rows, cols } => write!(f, "{rows}x{cols}"),
+        }
+    }
+}
+
+/// Inverse of `Display`, ignoring case and surrounding whitespace. Does not
+/// check the size range; see [`PuzzleSpec::dims`].
+impl FromStr for PuzzleSpec {
+    type Err = AppError;
+
+    fn from_str(s: &str) -> Result<Self, AppError> {
+        match s.trim().to_ascii_lowercase().as_str() {
+            "beginner" => Ok(Self::Beginner),
+            "intermediate" => Ok(Self::Intermediate),
+            "expert" => Ok(Self::Expert),
+            other => {
+                let (rows, cols) = other.split_once('x').ok_or_else(not_a_code)?;
+                Ok(Self::Custom {
+                    rows: rows.parse().map_err(|_| not_a_code())?,
+                    cols: cols.parse().map_err(|_| not_a_code())?,
+                })
             }
         }
     }
@@ -79,6 +116,11 @@ pub struct Run {
 impl Puzzle {
     pub fn index(&self, r: usize, c: usize) -> usize {
         r * self.cols as usize + c
+    }
+
+    /// Share code that reproduces this puzzle, e.g. `expert-2874619203-a7f3`.
+    pub fn code(&self) -> String {
+        ShareCode::of(self).to_string()
     }
 
     /// One run per clue, row-major by clue cell, across before down.
