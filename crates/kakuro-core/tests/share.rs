@@ -58,6 +58,14 @@ fn rejects_malformed_codes() {
         "3x3-7-0000",
         "expert-4294967296-0000",
         "expert-7-0000-extra",
+        "+5x6-1-0000",
+        "05x06-1-0000",
+        "5x06-1-0000",
+        " expert -7-0000",
+        "expert-+7-0000",
+        "expert-007-0000",
+        "expert- 7-0000",
+        "expert-7-0ab",
     ] {
         let err = ShareCode::parse(code).unwrap_err().to_string();
         assert!(err.starts_with("invalid input: "), "{code:?}: {err}");
@@ -78,5 +86,26 @@ fn open_rejects_a_wrong_check() {
     assert_eq!(
         wrong.open().unwrap_err().to_string(),
         "invalid input: code and puzzle don't match (typo, or a different app version)"
+    );
+}
+
+#[test]
+fn check_depends_on_the_grid() {
+    let checks: Vec<u16> = (1..=5)
+        .map(|seed| ShareCode::of(&generate(PuzzleSpec::Beginner, seed).unwrap()).check)
+        .collect();
+    let mut distinct = checks.clone();
+    distinct.sort_unstable();
+    distinct.dedup();
+    assert_eq!(distinct.len(), checks.len(), "checks {checks:?}");
+}
+
+/// Codes shared between installs must keep opening the same puzzle: if this
+/// changes, every code handed out so far stops working.
+#[test]
+fn known_code_is_stable() {
+    assert_eq!(
+        generate(PuzzleSpec::Expert, 7).unwrap().code(),
+        "expert-7-678c"
     );
 }

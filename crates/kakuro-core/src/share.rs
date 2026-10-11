@@ -28,8 +28,9 @@ impl ShareCode {
         }
     }
 
-    /// Parses a code, ignoring case and surrounding whitespace. Rejects sizes
-    /// outside [`PuzzleSpec::dims`] here, before anything is generated.
+    /// Parses a code, ignoring case and surrounding whitespace; anything else
+    /// must be exactly the form `Display` writes. Rejects sizes outside
+    /// [`PuzzleSpec::dims`] here, before anything is generated.
     pub fn parse(code: &str) -> Result<Self, AppError> {
         let code = code.trim().to_ascii_lowercase();
         let mut parts = code.split('-');
@@ -40,12 +41,16 @@ impl ShareCode {
         };
         let spec: PuzzleSpec = spec.parse()?;
         spec.dims()?;
-        let seed = seed.parse().map_err(|_| not_a_code())?;
-        if check.len() != 4 || !check.bytes().all(|b| b.is_ascii_hexdigit()) {
+        let parsed = Self {
+            spec,
+            seed: seed.parse().map_err(|_| not_a_code())?,
+            check: u16::from_str_radix(check, 16).map_err(|_| not_a_code())?,
+        };
+        // `str::parse` also takes `+7`, `007`, ` 7`; only the canonical form is a code.
+        if parsed.to_string() != code {
             return Err(not_a_code());
         }
-        let check = u16::from_str_radix(check, 16).map_err(|_| not_a_code())?;
-        Ok(Self { spec, seed, check })
+        Ok(parsed)
     }
 
     /// Regenerates the puzzle and verifies the check.

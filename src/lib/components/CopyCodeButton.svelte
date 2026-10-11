@@ -10,9 +10,9 @@ let copied = $state(false);
 let timer: ReturnType<typeof setTimeout> | undefined;
 
 async function copy() {
-  clearTimeout(timer);
-  copied = false;
   if (!(await game.copyCode())) return;
+  // After the await: an earlier click may have set its timer meanwhile.
+  clearTimeout(timer);
   copied = true;
   timer = setTimeout(() => (copied = false), 1500);
 }
