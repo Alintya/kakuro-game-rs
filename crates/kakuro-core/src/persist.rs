@@ -54,7 +54,13 @@ pub fn load(path: &Path) -> Result<Option<GameState>, AppError> {
         Err(e) if e.kind() == ErrorKind::NotFound => return Ok(None),
         Err(e) => return Err(e.into()),
     };
-    let version = serde_json::from_str::<SaveHeader>(&text).map_or(0, |h| h.version);
+    let version = match serde_json::from_str::<SaveHeader>(&text) {
+        Ok(header) => header.version,
+        Err(e) => {
+            tracing::warn!(path = %path.display(), error = %e, "ignoring save with unreadable header");
+            return Ok(None);
+        }
+    };
     if version > SAVE_VERSION {
         tracing::warn!(path = %path.display(), version, "ignoring save from a newer app version");
         return Ok(None);

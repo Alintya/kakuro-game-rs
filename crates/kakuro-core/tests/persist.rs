@@ -45,6 +45,18 @@ fn corrupt_or_inconsistent_file_loads_as_no_game() {
     game.entries.pop();
     fs::write(&path, serde_json::to_string(&game).unwrap()).unwrap();
     assert_eq!(load(&path).unwrap(), None);
+
+    // A valid game whose version is not a u32 is not mistaken for a legacy save.
+    for bad in [
+        serde_json::json!("1"),
+        serde_json::json!(-1),
+        serde_json::json!(1.5),
+    ] {
+        let mut value = serde_json::to_value(game_in_progress()).unwrap();
+        value["version"] = bad;
+        fs::write(&path, value.to_string()).unwrap();
+        assert_eq!(load(&path).unwrap(), None);
+    }
 }
 
 #[test]
