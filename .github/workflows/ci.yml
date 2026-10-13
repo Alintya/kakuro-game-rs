@@ -22,7 +22,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run check
       - run: bun run lint
-      - run: bun run build # tauri::generate_context! embeds frontendDist (../build) at compile time
+      - run: bun run build # proves the frontend builds; clippy/test compile without ../build
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo test --workspace --locked
