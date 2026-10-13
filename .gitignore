@@ -28,10 +28,6 @@ Desktop.ini
 .env.*
 !.env.example
 
-# Tauri
-src-tauri/gen/
-
-
 # Test artifacts
 coverage/
 _out/
