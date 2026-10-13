@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tag matches manifest versions
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          cargo_v=$(grep -m1 '^version = ' Cargo.toml | cut -d'"' -f2)
+          pkg_v=$(jq -r .version package.json)
+          conf_v=$(jq -r .version src-tauri/tauri.conf.json)
+          for v in "$cargo_v" "$pkg_v" "$conf_v"; do
+            [ "$v" = "$tag" ] || { echo "manifest version $v does not match tag $GITHUB_REF_NAME"; exit 1; }
+          done
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+
+  build:
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            args: --no-bundle
+            asset: kakuro-${{ github.ref_name }}-windows-x64.zip
+          - os: ubuntu-22.04
+            args: --bundles appimage
+            asset: kakuro-${{ github.ref_name }}-linux-x64.AppImage
+          - os: macos-latest
+            args: --target universal-apple-darwin --bundles app
+            asset: kakuro-${{ github.ref_name }}-macos-universal.zip
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tauri system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf xdg-utils
+      - uses: oven-sh/setup-bun@v2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ runner.os == 'macOS' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+      - uses: Swatinem/rust-cache@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run tauri build ${{ matrix.args }}
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path target/release/kakuro.exe -DestinationPath ${{ matrix.asset }}
+      - name: Package (Linux)
+        if: runner.os == 'Linux'
+        run: mv target/release/bundle/appimage/*.AppImage ${{ matrix.asset }}
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        run: ditto -c -k --keepParent target/universal-apple-darwin/release/bundle/macos/*.app ${{ matrix.asset }}
+      - name: Upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.asset }}
