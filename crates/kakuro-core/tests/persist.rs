@@ -1,6 +1,6 @@
 use std::fs;
 
-use kakuro_core::{GameState, PuzzleSpec, generate, load, save};
+use kakuro_core::{GameState, PuzzleSpec, SAVE_VERSION, generate, load, save};
 
 fn game_in_progress() -> GameState {
     let mut game = GameState::new(generate(PuzzleSpec::Beginner, 2).unwrap());
@@ -44,6 +44,20 @@ fn corrupt_or_inconsistent_file_loads_as_no_game() {
     let mut game = game_in_progress();
     game.entries.pop();
     fs::write(&path, serde_json::to_string(&game).unwrap()).unwrap();
+    assert_eq!(load(&path).unwrap(), None);
+}
+
+#[test]
+fn newer_save_version_loads_as_no_game() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("game.json");
+    save(&path, &game_in_progress()).unwrap();
+    let mut value: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
+    assert_eq!(value["version"], serde_json::json!(SAVE_VERSION));
+
+    value["version"] = (SAVE_VERSION + 1).into();
+    fs::write(&path, value.to_string()).unwrap();
     assert_eq!(load(&path).unwrap(), None);
 }
 
