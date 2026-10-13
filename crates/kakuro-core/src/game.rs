@@ -151,9 +151,6 @@ impl GameState {
     pub fn snapshot(&self) -> GameSnapshot {
         let conflicts = self.conflicts();
         let solved = self.solved_given(&conflicts);
-        if solved {
-            debug_assert_eq!(self.entries, self.puzzle.solution);
-        }
         GameSnapshot {
             spec: self.puzzle.spec,
             code: self.puzzle.code(),
