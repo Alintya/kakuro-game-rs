@@ -3,7 +3,12 @@ members = ["crates/kakuro-core", "src-tauri"]
 resolver = "2"
 
 [workspace.package]
+version = "0.1.0"
 edition = "2024"
+rust-version = "1.97"
+license = "MIT OR Apache-2.0"
+authors = ["Alintya"]
+repository = "https://github.com/Alintya/kakuro-game-rs"
 
 [workspace.dependencies]
 # Serialization
