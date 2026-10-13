@@ -12,7 +12,7 @@ To play the same puzzle as someone else, share its **puzzle code** (e.g. `expert
 
 Portable builds are attached to each release on the [Releases page](https://github.com/Alintya/kakuro-game-rs/releases); nothing is installed.
 
-- **Windows x64**: `kakuro-v<version>-windows-x64.zip`. Unzip and run `kakuro.exe`. Needs the WebView2 Runtime, preinstalled on Windows 10 (1803+) and 11; otherwise install the [Evergreen Bootstrapper](https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section).
+- **Windows x64**: `kakuro-v<version>-windows-x64.zip`. Unzip and run `kakuro.exe`. The app is unsigned, so SmartScreen may show "Windows protected your PC" on the first launch: choose **More info** → **Run anyway**. Needs the WebView2 Runtime, preinstalled on Windows 10 (1803+) and 11; otherwise install the [Evergreen Bootstrapper](https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section).
 - **Linux x64**: `kakuro-v<version>-linux-x64.AppImage`. `chmod +x` it and run it. Needs webkit2gtk 4.1 (Ubuntu 22.04+, Fedora 36+, or equivalent).
 - **macOS (universal)**: `kakuro-v<version>-macos-universal.zip`. Unzip and move `Kakuro.app` anywhere. The app is unsigned: before the first launch run `xattr -dr com.apple.quarantine Kakuro.app` (or, after the first blocked launch, open System Settings → Privacy & Security and choose **Open Anyway**).
 
@@ -46,7 +46,7 @@ On Windows the app draws its own title bar (`src-tauri/tauri.windows.conf.json` 
 Prerequisites:
 
 - Rust 1.97 or newer via [rustup](https://rustup.rs) (`rust-toolchain.toml` selects stable with rustfmt and clippy).
-- [Bun](https://bun.sh) 1.4.2 (`packageManager` in `package.json`).
+- [Bun](https://bun.sh) 1.4.3 (`packageManager` in `package.json`).
 - Tauri's platform dependencies ([details](https://v2.tauri.app/start/prerequisites/)):
   - Windows: Microsoft C++ Build Tools ("Desktop development with C++") and the WebView2 Runtime.
   - Linux (Debian/Ubuntu): `sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev`
