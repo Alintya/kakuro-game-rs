@@ -12,9 +12,9 @@ To play the same puzzle as someone else, share its **puzzle code** (e.g. `expert
 
 Portable builds are attached to each release on the [Releases page](https://github.com/Alintya/kakuro-game-rs/releases); nothing is installed.
 
-- **Windows x64**: `kakuro-<version>-windows-x64.zip`. Unzip and run `kakuro.exe`. Needs the WebView2 Runtime, preinstalled on Windows 10 (1803+) and 11; otherwise install the [Evergreen Bootstrapper](https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section).
-- **Linux x64**: `kakuro-<version>-linux-x64.AppImage`. `chmod +x` it and run it. Needs webkit2gtk 4.1 (Ubuntu 22.04+, Fedora 36+, or equivalent).
-- **macOS (universal)**: `kakuro-<version>-macos-universal.zip`. Unzip and move `Kakuro.app` anywhere. The app is unsigned: before the first launch run `xattr -dr com.apple.quarantine Kakuro.app` (or right-click it and choose **Open**).
+- **Windows x64**: `kakuro-v<version>-windows-x64.zip`. Unzip and run `kakuro.exe`. Needs the WebView2 Runtime, preinstalled on Windows 10 (1803+) and 11; otherwise install the [Evergreen Bootstrapper](https://developer.microsoft.com/en-us/microsoft-edge/webview2/#download-section).
+- **Linux x64**: `kakuro-v<version>-linux-x64.AppImage`. `chmod +x` it and run it. Needs webkit2gtk 4.1 (Ubuntu 22.04+, Fedora 36+, or equivalent).
+- **macOS (universal)**: `kakuro-v<version>-macos-universal.zip`. Unzip and move `Kakuro.app` anywhere. The app is unsigned: before the first launch run `xattr -dr com.apple.quarantine Kakuro.app` (or, after the first blocked launch, open System Settings → Privacy & Security and choose **Open Anyway**).
 
 The app is developed and tested on Windows. The Linux and macOS builds come from CI and are untested; bug reports are welcome.
 
