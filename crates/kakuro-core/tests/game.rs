@@ -203,9 +203,9 @@ fn solving_stops_the_clock() {
     let at = |secs| t0 + Duration::from_secs(secs);
     g.resume_clock(t0);
     let solution = g.puzzle.solution.clone();
-    for i in 0..solution.len() {
+    for (i, &digit) in solution.iter().enumerate() {
         if g.puzzle.cells[i] == Cell::White {
-            g.set_entry(i, solution[i]).unwrap();
+            g.set_entry(i, digit).unwrap();
         }
     }
     g.resume_clock(at(10));

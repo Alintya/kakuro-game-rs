@@ -52,6 +52,7 @@
       "!**/.svelte-kit",
       "!**/target",
       "!**/src-tauri/gen",
+      "!**/src-tauri/icons",
       "!**/src/lib/ipc/bindings.ts"
     ]
   }
